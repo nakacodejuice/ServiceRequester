@@ -1,15 +1,49 @@
-﻿using System.Net;
-using System.Security.Cryptography;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Net;
 using System.ServiceProcess;
+using System.Text;
 using System.Xml;
-using System.Web.Services.Description;
+using Newtonsoft.Json;
 using Service.RNG;
 
 namespace ServiceRequester
 {
+
+    class Reqdata
+    {
+        public string eventstr;
+
+    }
+
+    class Data
+    {
+        public bool isnext;
+        public List<datareq> data;
+
+    }
+
+    public struct datareq
+    {
+        public string uid, method,paramsstr;
+        public bool compress,debug,json;
+
+        public datareq(string uid1, string method1, string paramsstr1, bool compress1, bool debug1, bool json1)
+        {
+            uid = uid1;
+            method = method1;
+            paramsstr = paramsstr1;
+            compress = compress1;
+            debug = debug1;
+            json = json1;
+        }
+    }
+
     public partial class MainService : ServiceBase
     {
-
+        public bool stopbit;
         public static StConfig st;
         public struct StConfig
         {
@@ -46,23 +80,70 @@ namespace ServiceRequester
 
         protected override void OnStart(string[] args)
         {
-            string result;
-            Service.RNG.DataExchange n = new DataExchange();
-            n.UseDefaultCredentials = false;
-            n.Credentials = new NetworkCredential(st.loginRNG, st.passRNG);
-            result = n.ВыполнитьАлгоритмИПолучитьРезультат("Тест", "{}", false, false, true);
+            stopbit = false;
+            while (true)
+            {
+                if (stopbit == true)
+                {
+                    break;
+                }
+                //Reqdata reqdata = new Reqdata();
+                //reqdata.eventstr = "GetNewRequest";
+                //var json = JsonConvert.SerializeObject(reqdata);
+                string responseToString;
+                responseToString = "";
+                var response = PostMethod("{\"event\":\"GetNewRequest\"}", st.WSTrain, "application/json");
+                if (response != null)
+                {
+                    var strreader = new StreamReader(response.GetResponseStream(), Encoding.UTF8);
+                    responseToString = strreader.ReadToEnd();
+                }
 
+                //responseToString = responseToString.Replace("params", "paramsstr");
+                Data data = JsonConvert.DeserializeObject<Data>(responseToString);
+                if (data.data.Count > 0)
+                {
+                    string result;
+                    Service.RNG.DataExchange n = new DataExchange();
+                    n.UseDefaultCredentials = false;
+                    n.Credentials = new NetworkCredential(st.loginRNG, st.passRNG);
+                    result = n.ВыполнитьАлгоритмИПолучитьРезультат("ПаровозикиФоновыеЗадания", responseToString, false,
+                        false, true);
+                }
 
+                Thread.Sleep(Convert.ToInt32(st.frequencyMiliSeconds));
+            }
+
+        }
+
+        public static HttpWebResponse PostMethod(string postedData, string postUrl, string contentType)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(postUrl);
+            request.Method = "POST";
+            request.Credentials = CredentialCache.DefaultCredentials;
+
+            UTF8Encoding encoding = new UTF8Encoding();
+            var bytes = encoding.GetBytes(postedData);
+
+            request.ContentType = contentType;
+            request.ContentLength = bytes.Length;
+
+            using (var newStream = request.GetRequestStream())
+            {
+                newStream.Write(bytes, 0, bytes.Length);
+                newStream.Close();
+            }
+            return (HttpWebResponse)request.GetResponse();
         }
 
         protected override void OnStop()
         {
-
+            stopbit = false;
         }
 
         protected override void OnPause()
         {
-            //stopSerialRead = true;
+            stopbit = false;
         }
 
         protected override void OnContinue()
@@ -70,6 +151,8 @@ namespace ServiceRequester
             string[] args = { "", "" };
             OnStart(args);
         }
+
+    
 
         public static StConfig readconfig(string pathtoXML, string RootElement, string Node)
         {

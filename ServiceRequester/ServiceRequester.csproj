@@ -140,13 +140,10 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Web References\RNG\DataExchangeSoapBinding.wsdl" />
+    <None Include="Web References\RNG\DataExchange.wsdl" />
     <None Include="Web References\RNG\Reference.map">
       <Generator>MSDiscoCodeGenerator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-    <None Include="Web References\RNG\ВыполнитьАлгоритмИПолучитьРезультатResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -161,10 +158,10 @@
     <WebReferences Include="Web References\" />
   </ItemGroup>
   <ItemGroup>
-    <WebReferenceUrl Include="http://127.0.0.1:8000/DataExchange/ws%3fwsdl">
+    <WebReferenceUrl Include="http://localhost/RNG/ws/dataexchange.1cws%3fwsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\RNG\</RelPath>
-      <UpdateFromURL>http://127.0.0.1:8000/DataExchange/ws%3fwsdl</UpdateFromURL>
+      <UpdateFromURL>http://localhost/RNG/ws/dataexchange.1cws%3fwsdl</UpdateFromURL>
       <ServiceLocationURL>
       </ServiceLocationURL>
       <CachedDynamicPropName>

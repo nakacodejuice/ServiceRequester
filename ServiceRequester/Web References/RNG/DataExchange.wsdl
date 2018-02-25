@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:xsd1="http://www.dataexchange.org" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:soapbind="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12bind="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:tns="http://www.dataexchange.org" name="DataExchange" targetNamespace="http://www.dataexchange.org" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <xs:schema xmlns:xs1="http://www.dataexchange.org" elementFormDefault="qualified" targetNamespace="http://www.dataexchange.org" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="ВыполнитьАлгоритмИПолучитьРезультат">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Идентификатор" type="xs:string" />
+            <xs:element name="ПараметрыАлгоритма" type="xs:string" />
+            <xs:element name="СжиматьРезультат" type="xs:boolean" />
+            <xs:element name="РежимОтладки" type="xs:boolean" />
+            <xs:element name="JSON" nillable="true" type="xs:boolean" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ВыполнитьАлгоритмИПолучитьРезультатResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="return" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+  </types>
+  <message name="ВыполнитьАлгоритмИПолучитьРезультатRequestMessage">
+    <part name="parameters" element="tns:ВыполнитьАлгоритмИПолучитьРезультат" />
+  </message>
+  <message name="ВыполнитьАлгоритмИПолучитьРезультатResponseMessage">
+    <part name="parameters" element="tns:ВыполнитьАлгоритмИПолучитьРезультатResponse" />
+  </message>
+  <portType name="DataExchangePortType">
+    <operation name="ВыполнитьАлгоритмИПолучитьРезультат">
+      <input message="tns:ВыполнитьАлгоритмИПолучитьРезультатRequestMessage" />
+      <output message="tns:ВыполнитьАлгоритмИПолучитьРезультатResponseMessage" />
+    </operation>
+  </portType>
+  <binding name="DataExchangeSoapBinding" type="tns:DataExchangePortType">
+    <soapbind:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="ВыполнитьАлгоритмИПолучитьРезультат">
+      <soapbind:operation soapAction="http://www.dataexchange.org#DataExchange:ВыполнитьАлгоритмИПолучитьРезультат" style="document" />
+      <input>
+        <soapbind:body use="literal" />
+      </input>
+      <output>
+        <soapbind:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <binding name="DataExchangeSoap12Binding" type="tns:DataExchangePortType">
+    <soap12bind:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="ВыполнитьАлгоритмИПолучитьРезультат">
+      <soap12bind:operation soapAction="http://www.dataexchange.org#DataExchange:ВыполнитьАлгоритмИПолучитьРезультат" style="document" />
+      <input>
+        <soap12bind:body use="literal" />
+      </input>
+      <output>
+        <soap12bind:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="DataExchange">
+    <port name="DataExchangeSoap" binding="tns:DataExchangeSoapBinding">
+      <documentation>
+        <wsi:Claim xmlns:wsi="http://ws-i.org/schemas/conformanceClaim/" conformsTo="http://ws-i.org/profiles/basic/1.1" />
+      </documentation>
+      <soapbind:address location="http://localhost/RNG/ws/dataexchange.1cws" />
+    </port>
+    <port name="DataExchangeSoap12" binding="tns:DataExchangeSoap12Binding">
+      <soap12bind:address location="http://localhost/RNG/ws/dataexchange.1cws" />
+    </port>
+  </service>
+</definitions>

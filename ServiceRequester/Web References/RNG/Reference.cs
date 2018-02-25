@@ -73,26 +73,34 @@ namespace Service.RNG {
         public event ВыполнитьАлгоритмИПолучитьРезультатCompletedEventHandler ВыполнитьАлгоритмИПолучитьРезультатCompleted;
         
         /// <remarks/>
-        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("ВыполнитьАлгоритмИПолучитьРезультат", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Bare)]
-        [return: System.Xml.Serialization.XmlElementAttribute("ВыполнитьАлгоритмИПолучитьРезультатResponse", Namespace="http://www.dataexchange.org")]
-        public ВыполнитьАлгоритмИПолучитьРезультатResponse ВыполнитьАлгоритмИПолучитьРезультат([System.Xml.Serialization.XmlElementAttribute("ВыполнитьАлгоритмИПолучитьРезультат", Namespace="http://www.dataexchange.org")] ВыполнитьАлгоритмИПолучитьРезультат ВыполнитьАлгоритмИПолучитьРезультат1) {
+        [System.Web.Services.Protocols.SoapDocumentMethodAttribute("http://www.dataexchange.org#DataExchange:ВыполнитьАлгоритмИПолучитьРезультат", RequestNamespace="http://www.dataexchange.org", ResponseNamespace="http://www.dataexchange.org", Use=System.Web.Services.Description.SoapBindingUse.Literal, ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.Wrapped)]
+        [return: System.Xml.Serialization.XmlElementAttribute("return")]
+        public string ВыполнитьАлгоритмИПолучитьРезультат(string Идентификатор, string ПараметрыАлгоритма, bool СжиматьРезультат, bool РежимОтладки, [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)] System.Nullable<bool> JSON) {
             object[] results = this.Invoke("ВыполнитьАлгоритмИПолучитьРезультат", new object[] {
-                        ВыполнитьАлгоритмИПолучитьРезультат1});
-            return ((ВыполнитьАлгоритмИПолучитьРезультатResponse)(results[0]));
+                        Идентификатор,
+                        ПараметрыАлгоритма,
+                        СжиматьРезультат,
+                        РежимОтладки,
+                        JSON});
+            return ((string)(results[0]));
         }
         
         /// <remarks/>
-        public void ВыполнитьАлгоритмИПолучитьРезультатAsync(ВыполнитьАлгоритмИПолучитьРезультат ВыполнитьАлгоритмИПолучитьРезультат1) {
-            this.ВыполнитьАлгоритмИПолучитьРезультатAsync(ВыполнитьАлгоритмИПолучитьРезультат1, null);
+        public void ВыполнитьАлгоритмИПолучитьРезультатAsync(string Идентификатор, string ПараметрыАлгоритма, bool СжиматьРезультат, bool РежимОтладки, System.Nullable<bool> JSON) {
+            this.ВыполнитьАлгоритмИПолучитьРезультатAsync(Идентификатор, ПараметрыАлгоритма, СжиматьРезультат, РежимОтладки, JSON, null);
         }
         
         /// <remarks/>
-        public void ВыполнитьАлгоритмИПолучитьРезультатAsync(ВыполнитьАлгоритмИПолучитьРезультат ВыполнитьАлгоритмИПолучитьРезультат1, object userState) {
+        public void ВыполнитьАлгоритмИПолучитьРезультатAsync(string Идентификатор, string ПараметрыАлгоритма, bool СжиматьРезультат, bool РежимОтладки, System.Nullable<bool> JSON, object userState) {
             if ((this.ВыполнитьАлгоритмИПолучитьРезультатOperationCompleted == null)) {
                 this.ВыполнитьАлгоритмИПолучитьРезультатOperationCompleted = new System.Threading.SendOrPostCallback(this.OnВыполнитьАлгоритмИПолучитьРезультатOperationCompleted);
             }
             this.InvokeAsync("ВыполнитьАлгоритмИПолучитьРезультат", new object[] {
-                        ВыполнитьАлгоритмИПолучитьРезультат1}, this.ВыполнитьАлгоритмИПолучитьРезультатOperationCompleted, userState);
+                        Идентификатор,
+                        ПараметрыАлгоритма,
+                        СжиматьРезультат,
+                        РежимОтладки,
+                        JSON}, this.ВыполнитьАлгоритмИПолучитьРезультатOperationCompleted, userState);
         }
         
         private void OnВыполнитьАлгоритмИПолучитьРезультатOperationCompleted(object arg) {
@@ -122,141 +130,6 @@ namespace Service.RNG {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.34230")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.dataexchange.org")]
-    public partial class ВыполнитьАлгоритмИПолучитьРезультат {
-        
-        private string идентификаторField;
-        
-        private string параметрыАлгоритмаField;
-        
-        private System.Nullable<bool> сжиматьРезультатField;
-        
-        private bool сжиматьРезультатFieldSpecified;
-        
-        private System.Nullable<bool> режимОтладкиField;
-        
-        private bool режимОтладкиFieldSpecified;
-        
-        private System.Nullable<bool> jSONField;
-        
-        private bool jSONFieldSpecified;
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public string Идентификатор {
-            get {
-                return this.идентификаторField;
-            }
-            set {
-                this.идентификаторField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public string ПараметрыАлгоритма {
-            get {
-                return this.параметрыАлгоритмаField;
-            }
-            set {
-                this.параметрыАлгоритмаField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public System.Nullable<bool> СжиматьРезультат {
-            get {
-                return this.сжиматьРезультатField;
-            }
-            set {
-                this.сжиматьРезультатField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool СжиматьРезультатSpecified {
-            get {
-                return this.сжиматьРезультатFieldSpecified;
-            }
-            set {
-                this.сжиматьРезультатFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public System.Nullable<bool> РежимОтладки {
-            get {
-                return this.режимОтладкиField;
-            }
-            set {
-                this.режимОтладкиField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool РежимОтладкиSpecified {
-            get {
-                return this.режимОтладкиFieldSpecified;
-            }
-            set {
-                this.режимОтладкиFieldSpecified = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public System.Nullable<bool> JSON {
-            get {
-                return this.jSONField;
-            }
-            set {
-                this.jSONField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool JSONSpecified {
-            get {
-                return this.jSONFieldSpecified;
-            }
-            set {
-                this.jSONFieldSpecified = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.34230")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.dataexchange.org")]
-    public partial class ВыполнитьАлгоритмИПолучитьРезультатResponse {
-        
-        private string выполнитьАлгоритмИПолучитьРезультатResultField;
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public string ВыполнитьАлгоритмИПолучитьРезультатResult {
-            get {
-                return this.выполнитьАлгоритмИПолучитьРезультатResultField;
-            }
-            set {
-                this.выполнитьАлгоритмИПолучитьРезультатResultField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.0.30319.33440")]
     public delegate void ВыполнитьАлгоритмИПолучитьРезультатCompletedEventHandler(object sender, ВыполнитьАлгоритмИПолучитьРезультатCompletedEventArgs e);
     
@@ -274,10 +147,10 @@ namespace Service.RNG {
         }
         
         /// <remarks/>
-        public ВыполнитьАлгоритмИПолучитьРезультатResponse Result {
+        public string Result {
             get {
                 this.RaiseExceptionIfNecessary();
-                return ((ВыполнитьАлгоритмИПолучитьРезультатResponse)(this.results[0]));
+                return ((string)(this.results[0]));
             }
         }
     }

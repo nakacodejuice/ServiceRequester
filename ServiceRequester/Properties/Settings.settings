@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="Service_RNG_DataExchange" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://127.0.0.1:8000/DataExchange/ws</Value>
+      <Value Profile="(Default)">http://localhost/RNG/ws/dataexchange.1cws</Value>
     </Setting>
   </Settings>
 </SettingsFile>
