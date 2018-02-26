@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Net;
@@ -47,10 +48,10 @@ namespace ServiceRequester
         public static StConfig st;
         public struct StConfig
         {
-            public string WSRNG, WSTrain, frequencyMiliSeconds, loginRNG, passRNG, loginTrain, passTrain;
+            public string WSRNG, WSTrain, frequencyMiliSeconds, loginRNG, passRNG, loginTrain, passTrain,log;
 
             public StConfig(string p1, string p2, string IP2, string lRNG,string pRNG,
-                                string logTrain,string pTrain)
+                                string logTrain,string pTrain, string log1)
             {
                 WSRNG = p1;
                 WSTrain = p2;
@@ -59,6 +60,7 @@ namespace ServiceRequester
                 passRNG = pRNG;
                 loginTrain = logTrain;
                 passTrain = pTrain;
+                log = log1;
             }
         }
 
@@ -87,33 +89,68 @@ namespace ServiceRequester
                 {
                     break;
                 }
+
+                Data data = new Data();
                 //Reqdata reqdata = new Reqdata();
                 //reqdata.eventstr = "GetNewRequest";
                 //var json = JsonConvert.SerializeObject(reqdata);
-                string responseToString;
-                responseToString = "";
-                var response = PostMethod("{\"event\":\"GetNewRequest\"}", st.WSTrain, "application/json");
-                if (response != null)
+                try
                 {
-                    var strreader = new StreamReader(response.GetResponseStream(), Encoding.UTF8);
-                    responseToString = strreader.ReadToEnd();
-                }
 
-                //responseToString = responseToString.Replace("params", "paramsstr");
-                Data data = JsonConvert.DeserializeObject<Data>(responseToString);
-                if (data.data.Count > 0)
+
+                    string responseToString;
+                    responseToString = "";
+                    var response = PostMethod("{\"event\":\"GetNewRequest\"}", st.WSTrain, "application/json");
+                    if (response != null)
+                    {
+                        var strreader = new StreamReader(response.GetResponseStream(), Encoding.UTF8);
+                        responseToString = strreader.ReadToEnd();
+                    }
+
+                    //responseToString = responseToString.Replace("params", "paramsstr");
+                    data = JsonConvert.DeserializeObject<Data>(responseToString);
+                    if (data.data.Count > 0)
+                    {
+                        string result;
+                        Service.RNG.DataExchange n = new DataExchange();
+                        n.UseDefaultCredentials = false;
+                        n.Credentials = new NetworkCredential(st.loginRNG, st.passRNG);
+                        result = n.ВыполнитьАлгоритмИПолучитьРезультат("ПаровозикиФоновыеЗадания", responseToString,
+                            false,
+                            false, true);
+                        DateTime localDate = DateTime.Now;
+                        StreamWriter file = Getlog(st.log);
+                        file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передано в RNG запросов " + data.data.Count + ". Результат - " + Convert.ToString(result));
+                        file.Close();
+
+                    }
+                }
+                catch (Exception ex)
                 {
-                    string result;
-                    Service.RNG.DataExchange n = new DataExchange();
-                    n.UseDefaultCredentials = false;
-                    n.Credentials = new NetworkCredential(st.loginRNG, st.passRNG);
-                    result = n.ВыполнитьАлгоритмИПолучитьРезультат("ПаровозикиФоновыеЗадания", responseToString, false,
-                        false, true);
+                    DateTime localDate = DateTime.Now;
+                    StreamWriter file = Getlog(st.log);
+                    file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG" + data.data.Count +".Ошибка - "+ ex.ToString());
+                    file.Close();
                 }
 
                 Thread.Sleep(Convert.ToInt32(st.frequencyMiliSeconds));
             }
 
+        }
+
+        private static StreamWriter Getlog(string fileName)
+        {
+            if (File.Exists(fileName))
+            {
+                StreamWriter sw = new StreamWriter(new FileStream(fileName, FileMode.Append, FileAccess.Write));
+                return sw;
+            }
+            else
+            {
+                StreamWriter sw = new StreamWriter(new FileStream(fileName, FileMode.Create, FileAccess.Write));
+                return sw;
+
+            }
         }
 
         public static HttpWebResponse PostMethod(string postedData, string postUrl, string contentType)
@@ -203,6 +240,12 @@ namespace ServiceRequester
                         reader.Read();
                         if (reader.Value.IndexOf('\n') == -1)
                             cf.passTrain = reader.Value;
+                    }
+                    else if (reader.Name == "log")
+                    {
+                        reader.Read();
+                        if (reader.Value.IndexOf('\n') == -1)
+                            cf.log = reader.Value;
                     }
                 }
 
