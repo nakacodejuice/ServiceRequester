@@ -42,54 +42,37 @@ namespace ServiceRequester
         }
     }
 
-    public partial class MainService : ServiceBase
+    public class Requester
     {
-        public bool stopbit;
-        public static StConfig st;
-        public struct StConfig
+        public static string WSRNG;
+        public static string WSTrain;
+        public static string frequencyMiliSeconds;
+        public static string loginRNG;
+        public static string passRNG;
+        public static string loginTrain;
+        public static string passTrain;
+        public static string log;
+        public static bool KeepLogging;
+        public static int freq;
+
+        public Requester(string WSRNGt, string WSTraint, string frequencyMiliSecondst, string loginRNGt, string passRNGt, string loginTraint, string passTraint, string logt, bool KeepLoggingt)
         {
-            public string WSRNG, WSTrain, frequencyMiliSeconds, loginRNG, passRNG, loginTrain, passTrain,log;
+            WSRNG = WSRNGt;
+            WSTrain = WSTraint;
+            frequencyMiliSeconds = frequencyMiliSecondst;
+            loginRNG = loginRNGt;
+            passRNG = passRNGt;
+            loginTrain = loginTraint;
+            passTrain = passTraint;
+            log = logt;
+            KeepLogging = KeepLoggingt;
+    }
 
-            public StConfig(string p1, string p2, string IP2, string lRNG,string pRNG,
-                                string logTrain,string pTrain, string log1)
-            {
-                WSRNG = p1;
-                WSTrain = p2;
-                frequencyMiliSeconds = IP2;
-                loginRNG = lRNG;
-                passRNG = pRNG;
-                loginTrain = logTrain;
-                passTrain = pTrain;
-                log = log1;
-            }
-        }
-
-        public MainService(string[] args)
+        public void RequestProc()
         {
-            st = readconfig(args[0], "configRest", "WSRNG");
-            InitializeComponent();
-
-
-        }
-
-        public MainService()
-        {
-            st = readconfig("config.xml", "configRest", "WSRNG");
-            InitializeComponent();
-
-
-        }
-
-        protected override void OnStart(string[] args)
-        {
-            stopbit = false;
+            freq = Convert.ToInt32(frequencyMiliSeconds);
             while (true)
             {
-                if (stopbit == true)
-                {
-                    break;
-                }
-
                 Data data = new Data();
                 //Reqdata reqdata = new Reqdata();
                 //reqdata.eventstr = "GetNewRequest";
@@ -100,7 +83,7 @@ namespace ServiceRequester
 
                     string responseToString;
                     responseToString = "";
-                    var response = PostMethod("{\"event\":\"GetNewRequest\"}", st.WSTrain, "application/json");
+                    var response = PostMethod("{\"event\":\"GetNewRequest\"}", WSTrain, "application/json", loginTrain, passTrain);
                     if (response != null)
                     {
                         var strreader = new StreamReader(response.GetResponseStream(), Encoding.UTF8);
@@ -113,29 +96,73 @@ namespace ServiceRequester
                     {
                         string result;
                         Service.RNG.DataExchange n = new DataExchange();
-                        n.UseDefaultCredentials = false;
-                        n.Credentials = new NetworkCredential(st.loginRNG, st.passRNG);
+                        n.UseDefaultCredentials = true;
+                        n.Credentials = new NetworkCredential(loginRNG, passRNG);
                         result = n.ВыполнитьАлгоритмИПолучитьРезультат("ПаровозикиФоновыеЗадания", responseToString,
                             false,
                             false, true);
-                        DateTime localDate = DateTime.Now;
-                        StreamWriter file = Getlog(st.log);
-                        file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передано в RNG запросов " + data.data.Count + ". Результат - " + Convert.ToString(result));
-                        file.Close();
+                        if (KeepLogging == true)
+                        {
+                            DateTime localDate = DateTime.Now;
+                            StreamWriter file = Getlog(log);
+                            file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передано в RNG запросов " + data.data.Count + ". Результат - " + Convert.ToString(result));
+                            file.Close();
+                        }
 
+                        freq = freq / 2;
+                    }
+                    else
+                    {
+                        freq = Convert.ToInt32(frequencyMiliSeconds);
                     }
                 }
                 catch (Exception ex)
                 {
                     DateTime localDate = DateTime.Now;
-                    StreamWriter file = Getlog(st.log);
-                    file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG" + data.data.Count +".Ошибка - "+ ex.ToString());
+                    StreamWriter file = Getlog(log);
+                    if (data.data != null)
+                    {
+                        file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG" + data.data.Count + ".Ошибка - " + ex.ToString());
+                    }
+                    else
+                    {
+                        file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG.Ошибка - " + ex.ToString());
+                    }
                     file.Close();
                 }
 
-                Thread.Sleep(Convert.ToInt32(st.frequencyMiliSeconds));
+                Thread.Sleep(freq);
             }
 
+        }
+
+        public static HttpWebResponse PostMethod(string postedData, string postUrl, string contentType, string login, string pass)
+        {
+            Uri myUri = new Uri(postUrl);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(myUri);
+            request.Method = "POST";
+            String encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(login + ":" + pass));
+            request.Headers.Add("Authorization", "Basic " + encoded);
+            NetworkCredential myNetworkCredential = new NetworkCredential(login, pass);
+            CredentialCache myCredentialCache = new CredentialCache();
+            myCredentialCache.Add(myUri, "Basic", myNetworkCredential);
+            CookieContainer myContainer = new CookieContainer();
+            request.CookieContainer = myContainer;
+            request.Credentials = myCredentialCache;
+            request.PreAuthenticate = true;
+
+            UTF8Encoding encoding = new UTF8Encoding();
+            var bytes = encoding.GetBytes(postedData);
+
+            request.ContentType = contentType;
+            request.ContentLength = bytes.Length;
+
+            using (var newStream = request.GetRequestStream())
+            {
+                newStream.Write(bytes, 0, bytes.Length);
+                newStream.Close();
+            }
+            return (HttpWebResponse)request.GetResponse();
         }
 
         private static StreamWriter Getlog(string fileName)
@@ -153,34 +180,67 @@ namespace ServiceRequester
             }
         }
 
-        public static HttpWebResponse PostMethod(string postedData, string postUrl, string contentType)
+
+
+    }
+
+    public partial class MainService : ServiceBase
+    {
+        public bool stopbit;
+        public static StConfig st;
+        static Requester requester;
+        Thread requesterproc;
+        public struct StConfig
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(postUrl);
-            request.Method = "POST";
-            request.Credentials = CredentialCache.DefaultCredentials;
+            public string WSRNG, WSTrain, frequencyMiliSeconds, loginRNG, passRNG, loginTrain, passTrain, log;
+            public bool KeepLogging;
 
-            UTF8Encoding encoding = new UTF8Encoding();
-            var bytes = encoding.GetBytes(postedData);
-
-            request.ContentType = contentType;
-            request.ContentLength = bytes.Length;
-
-            using (var newStream = request.GetRequestStream())
+            public StConfig(string p1, string p2, string IP2, string lRNG,string pRNG,
+                                string logTrain,string pTrain, string plog, bool pKeepLogging)
             {
-                newStream.Write(bytes, 0, bytes.Length);
-                newStream.Close();
+                WSRNG = p1;
+                WSTrain = p2;
+                frequencyMiliSeconds = IP2;
+                loginRNG = lRNG;
+                passRNG = pRNG;
+                loginTrain = logTrain;
+                passTrain = pTrain;
+                log = plog;
+                KeepLogging = pKeepLogging;
             }
-            return (HttpWebResponse)request.GetResponse();
+        }
+
+        public MainService(string[] args)
+        {
+            st = readconfig(args[0], "configRest", "WSRNG");
+            InitializeComponent();
+            requester = new Requester(st.WSRNG, st.WSTrain, st.frequencyMiliSeconds, st.loginRNG, st.passRNG, st.loginTrain, st.passTrain, st.log, st.KeepLogging);
+            requesterproc = new Thread(new ThreadStart(requester.RequestProc));
+        }
+
+        public MainService()
+        {
+            st = readconfig("config.xml", "config", "WSRNG");
+            InitializeComponent();
+            requester = new Requester(st.WSRNG, st.WSTrain, st.frequencyMiliSeconds, st.loginRNG, st.passRNG, st.loginTrain, st.passTrain, st.log, st.KeepLogging);
+            requesterproc = new Thread(new ThreadStart(requester.RequestProc));
+
+
+        }
+
+        protected override void OnStart(string[] args)
+        {
+            requesterproc.Start();
         }
 
         protected override void OnStop()
         {
-            stopbit = false;
+            requesterproc.Abort();
         }
 
         protected override void OnPause()
         {
-            stopbit = false;
+            requesterproc.Abort();
         }
 
         protected override void OnContinue()
@@ -246,6 +306,12 @@ namespace ServiceRequester
                         reader.Read();
                         if (reader.Value.IndexOf('\n') == -1)
                             cf.log = reader.Value;
+                    }
+                    else if (reader.Name == "KeepLogging")
+                    {
+                        reader.Read();
+                        if (reader.Value.IndexOf('\n') == -1)
+                            cf.KeepLogging = Convert.ToBoolean(reader.Value);
                     }
                 }
 

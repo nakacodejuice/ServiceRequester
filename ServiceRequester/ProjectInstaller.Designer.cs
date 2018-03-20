@@ -40,9 +40,9 @@
             // 
             // serviceInstaller1
             // 
-            this.serviceInstaller1.Description = "Служба приема показаний по смс";
-            this.serviceInstaller1.DisplayName = "Service SMS";
-            this.serviceInstaller1.ServiceName = "ServiceSMS";
+            this.serviceInstaller1.Description = "Служба паровозики для универсального вэб сервиса РНГ";
+            this.serviceInstaller1.DisplayName = "ServiceTrains";
+            this.serviceInstaller1.ServiceName = "ServiceTrains";
             this.serviceInstaller1.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
             // 
             // ProjectInstaller

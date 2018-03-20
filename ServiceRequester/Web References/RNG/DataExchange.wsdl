@@ -63,10 +63,10 @@
       <documentation>
         <wsi:Claim xmlns:wsi="http://ws-i.org/schemas/conformanceClaim/" conformsTo="http://ws-i.org/profiles/basic/1.1" />
       </documentation>
-      <soapbind:address location="http://localhost/RNG/ws/dataexchange.1cws" />
+      <soapbind:address location="http://h044-sqa-14/RNG_EGS/ws/dataexchange.1cws" />
     </port>
     <port name="DataExchangeSoap12" binding="tns:DataExchangeSoap12Binding">
-      <soap12bind:address location="http://localhost/RNG/ws/dataexchange.1cws" />
+      <soap12bind:address location="http://h044-sqa-14/RNG_EGS/ws/dataexchange.1cws" />
     </port>
   </service>
 </definitions>
