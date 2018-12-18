@@ -118,17 +118,20 @@ namespace ServiceRequester
                 }
                 catch (Exception ex)
                 {
-                    DateTime localDate = DateTime.Now;
-                    StreamWriter file = Getlog(log);
-                    if (data.data != null)
+                    if (KeepLogging == true)
                     {
-                        file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG" + data.data.Count + ".Ошибка - " + ex.ToString());
+                        DateTime localDate = DateTime.Now;
+                        StreamWriter file = Getlog(log);
+                        if (data.data != null)
+                        {
+                            file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG" + data.data.Count + ".Ошибка - " + ex.ToString());
+                        }
+                        else
+                        {
+                            file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG.Ошибка - " + ex.ToString());
+                        }
+                        file.Close();
                     }
-                    else
-                    {
-                        file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG.Ошибка - " + ex.ToString());
-                    }
-                    file.Close();
                 }
 
                 Thread.Sleep(freq);
