@@ -68,71 +68,80 @@ namespace ServiceRequester
             KeepLogging = KeepLoggingt;
     }
 
+        public void threadproc()
+        {
+            Data data = new Data();
+            //Reqdata reqdata = new Reqdata();
+            //reqdata.eventstr = "GetNewRequest";
+            //var json = JsonConvert.SerializeObject(reqdata);
+            try
+            {
+
+
+                string responseToString;
+                responseToString = "";
+                var response = PostMethod("{\"event\":\"GetNewRequest\"}", WSTrain, "application/json", loginTrain, passTrain);
+                if (response != null)
+                {
+                    var strreader = new StreamReader(response.GetResponseStream(), Encoding.UTF8);
+                    responseToString = strreader.ReadToEnd();
+                }
+
+                //responseToString = responseToString.Replace("params", "paramsstr");
+                data = JsonConvert.DeserializeObject<Data>(responseToString);
+                if (data.data.Count > 0)
+                {
+                    string result;
+                    Service.RNG.DataExchange n = new DataExchange();
+                    n.UseDefaultCredentials = true;
+                    n.Credentials = new NetworkCredential(loginRNG, passRNG);
+                    result = n.ВыполнитьАлгоритмИПолучитьРезультат("ПаровозикиФоновыеЗадания", responseToString,
+                        false,
+                        false, true);
+                    if (KeepLogging == true)
+                    {
+                        DateTime localDate = DateTime.Now;
+                        StreamWriter file = Getlog(log);
+                        file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передано в RNG запросов " + data.data.Count + ". Результат - " + Convert.ToString(result));
+                        file.Close();
+                    }
+
+                    freq = Convert.ToInt32(frequencyMiliSeconds) / 2;
+                }
+                else
+                {
+                    freq = Convert.ToInt32(frequencyMiliSeconds);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (KeepLogging == true)
+                {
+                    DateTime localDate = DateTime.Now;
+                    StreamWriter file = Getlog(log);
+                    if (data.data != null)
+                    {
+                        file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG" + data.data.Count + ".Ошибка - " + ex.ToString());
+                    }
+                    else
+                    {
+                        file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG.Ошибка - " + ex.ToString());
+                    }
+                    file.Close();
+                }
+            }
+
+
+
+        }
+
         public void RequestProc()
         {
             freq = Convert.ToInt32(frequencyMiliSeconds);
             while (true)
             {
-                Data data = new Data();
-                //Reqdata reqdata = new Reqdata();
-                //reqdata.eventstr = "GetNewRequest";
-                //var json = JsonConvert.SerializeObject(reqdata);
-                try
-                {
-
-
-                    string responseToString;
-                    responseToString = "";
-                    var response = PostMethod("{\"event\":\"GetNewRequest\"}", WSTrain, "application/json", loginTrain, passTrain);
-                    if (response != null)
-                    {
-                        var strreader = new StreamReader(response.GetResponseStream(), Encoding.UTF8);
-                        responseToString = strreader.ReadToEnd();
-                    }
-
-                    //responseToString = responseToString.Replace("params", "paramsstr");
-                    data = JsonConvert.DeserializeObject<Data>(responseToString);
-                    if (data.data.Count > 0)
-                    {
-                        string result;
-                        Service.RNG.DataExchange n = new DataExchange();
-                        n.UseDefaultCredentials = true;
-                        n.Credentials = new NetworkCredential(loginRNG, passRNG);
-                        result = n.ВыполнитьАлгоритмИПолучитьРезультат("ПаровозикиФоновыеЗадания", responseToString,
-                            false,
-                            false, true);
-                        if (KeepLogging == true)
-                        {
-                            DateTime localDate = DateTime.Now;
-                            StreamWriter file = Getlog(log);
-                            file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передано в RNG запросов " + data.data.Count + ". Результат - " + Convert.ToString(result));
-                            file.Close();
-                        }
-
-                        freq = freq / 2;
-                    }
-                    else
-                    {
-                        freq = Convert.ToInt32(frequencyMiliSeconds);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (KeepLogging == true)
-                    {
-                        DateTime localDate = DateTime.Now;
-                        StreamWriter file = Getlog(log);
-                        if (data.data != null)
-                        {
-                            file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG" + data.data.Count + ".Ошибка - " + ex.ToString());
-                        }
-                        else
-                        {
-                            file.WriteLine(localDate.ToString(new CultureInfo("ru-RU")) + "----на передачу в RNG.Ошибка - " + ex.ToString());
-                        }
-                        file.Close();
-                    }
-                }
+                Thread subrequesterproc = new Thread(new ThreadStart(threadproc));
+                subrequesterproc.Start();
 
                 Thread.Sleep(freq);
             }
